@@ -1,49 +1,28 @@
-from collections import defaultdict
+from functools import cache
 
-with open('test') as file:
+with open('input') as file:
     input = file.readline()
+    
+@cache
+def solve(blinks, stone):
+    if blinks == 0: 
+        return 1
+    
+    length = len(str(stone))
 
-blinks = 75
-solved = {'0': '1'}
-stones = defaultdict(int)
+    if stone == 0:
+        return solve(blinks - 1, 1)
 
-for i in input.split():
-    stones[i] = 1
+    elif length % 2 == 0:
+        left, right = int(str(stone)[:int(length/2)]), int(str(stone)[int(length/2):])
+        sum = solve(blinks - 1, left)
+        sum += solve(blinks - 1, right)
+        return sum
 
-for blink in range(blinks):
-    for k, v in stones.copy().items():
-        if v == 0: continue
-        stones[k] = stones[k] - v
+    else: return solve(blinks - 1, stone * 2024)
 
-        if k in solved:    
-            stones[solved[k]] = stones[solved[k]] + v
-        
-        else:
-            stone_long = []
-            for stone in k.split():
-                if stone in solved:
-                    stones[solved[stone]] = stones[solved[stone]] + 1
-                    stone_long.append(solved[stone])
+sum = 0
+for i in list(map(int,input.split())):
+    sum += solve(75, i)
 
-                else:
-                    l = len(stone)
-
-                    if l % 2 == 0: 
-                        newstone = stone[:int(l/2)] + ' ' + str(int(stone[int(l/2):]))
-
-                    else:
-                        n = int(stone)
-                        newstone = str(n * 2024)
-                    
-                    stones[newstone] = stones[newstone] + v
-                    solved[stone] = newstone
-                    stone_long.append(newstone)
-
-            solved[k] = " ".join(stone_long)
-
-result = []
-for k, v in stones.items():
-    for _ in range(v):
-        result += k.split()
-
-print(len(result)) 
+print(sum)
